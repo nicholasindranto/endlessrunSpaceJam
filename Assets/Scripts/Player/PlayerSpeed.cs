@@ -17,6 +17,7 @@ public class PlayerSpeed : MonoBehaviour
 
     // untuk nyimpen speednya sebelum attack
     private int speedBeforeAttack;
+    private int speedBeforeSprint;
 
     private void Awake() {
         currentSpeed = baseSpeed; // set dulu speed nya
@@ -31,6 +32,9 @@ public class PlayerSpeed : MonoBehaviour
 
         // subscribe biar speednya balik normal
         PlayerWeapon.OnAttackEnd += HandleAttackEnd;
+
+        PlayerSprint.OnSprintStart        += HandleSprintStart;   // ← tambahan
+        PlayerSprint.OnSprintEnd          += HandleSprintEnd;     // ← tambahan
     }
 
     private void OnDisable() {
@@ -39,6 +43,20 @@ public class PlayerSpeed : MonoBehaviour
         PlayerWeapon.OnAttackStart -= HandleAttackStart;
 
         PlayerWeapon.OnAttackEnd -= HandleAttackEnd;
+
+        PlayerSprint.OnSprintStart        -= HandleSprintStart;   // ← tambahan
+        PlayerSprint.OnSprintEnd          -= HandleSprintEnd;     // ← tambahan
+    }
+
+    private void HandleSprintStart(int sprintSpeed, float _)
+    {
+        speedBeforeSprint = currentSpeed; // simpan speed sebelum sprint
+        currentSpeed      = sprintSpeed;
+    }
+
+    private void HandleSprintEnd()
+    {
+        currentSpeed = speedBeforeSprint; // kembalikan ke speed sebelum sprint
     }
 
     private void HandleAttackStart(int slowSpeed)

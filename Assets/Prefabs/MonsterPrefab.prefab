@@ -195,7 +195,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81cd7f2ad01c63049b3da8fcbcaa4b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsterStartDistance: 100
+  monsterStartDistance: 20
   caughtThreshold: 7
   baseMonsterMovementPerSecond: 0.5
   distanceUI: {fileID: 0}

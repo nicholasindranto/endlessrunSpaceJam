@@ -60,6 +60,10 @@ public class MonsterChase : MonoBehaviour
     // nama param animasi chasenya
     public readonly string chaseParam = "IsChasing";
 
+    // ─── Tambah fields ini ───────────────────────────────────────────────────────
+    private bool  isSprintRetreating;
+    private float sprintRetreatPerSec;
+
     private void Awake() {
         currentMonsterMovementPerSecond = baseMonsterMovementPerSecond;
     }
@@ -82,6 +86,10 @@ public class MonsterChase : MonoBehaviour
         PlayerWeapon.OnAttackEnd += HandleAttackEnd;
 
         PlayerWeapon.OnMonsterStun += HandleOnStunned;
+
+        // ─── Di OnEnable / OnDisable ─────────────────────────────────────────────────
+        PlayerSprint.OnSprintStart += HandleSprintStart;
+        PlayerSprint.OnSprintEnd   += HandleSprintEnd;
     }
 
     private void OnDisable() {
@@ -92,6 +100,22 @@ public class MonsterChase : MonoBehaviour
         PlayerWeapon.OnAttackEnd -= HandleAttackEnd;
 
         PlayerWeapon.OnMonsterStun -= HandleOnStunned;
+
+        // ─── Di OnDisable ────────────────────────────────────────────────────────────
+        PlayerSprint.OnSprintStart -= HandleSprintStart;
+        PlayerSprint.OnSprintEnd   -= HandleSprintEnd;
+    }
+
+    // ─── Handlers ────────────────────────────────────────────────────────────────
+    private void HandleSprintStart(int _, float retreatPerSec)
+    {
+        sprintRetreatPerSec = retreatPerSec;
+        isSprintRetreating  = true;
+    }
+
+    private void HandleSprintEnd()
+    {
+        isSprintRetreating = false;
     }
 
     private void HandleAttackStart(int _)
@@ -164,12 +188,12 @@ public class MonsterChase : MonoBehaviour
         // cek apakah ketangkep
         CheckCaught();
 
-        timePassed += Time.deltaTime;
-
         // kalau misalkan di stun, maka instead of maju, monsternya mundur
         if (isStunned) RetreatMonster();
-        else if (!isChasingPaused) ChasePlayer(); // kalau nggak di pause ya ngejar
+        if (isSprintRetreating) SprintRetreat();
+        if (!isStunned && !isSprintRetreating && !isChasingPaused) ChasePlayer(); // kalau nggak di pause ya ngejar
 
+        timePassed += Time.deltaTime;
         // kalau udah melewati 1 detik maka distance berkurang lalu reset balik ke 0
         if (timePassed >= 1f)
         {
@@ -178,6 +202,13 @@ public class MonsterChase : MonoBehaviour
             // update uinya juga
             UpdateDistanceUI();
         }
+    }
+
+    // ─── Tambah method ini ───────────────────────────────────────────────────────
+    private void SprintRetreat()
+    {
+        // mundur sejauh sprintRetreatPerSec per detik × deltaTime = smooth
+        transform.Translate(Vector3.back * sprintRetreatPerSec * Time.deltaTime, Space.World);
     }
 
     private void RetreatMonster()

@@ -30,6 +30,8 @@ public class PlayerStamina : MonoBehaviour
 
     // reference ke tier sekarang
     private StaminaTier currentTier = StaminaTier.Normal;
+    // Tambah static property biar bisa dicek dari luar tanpa referensi
+    public static StaminaTier CurrentTier { get; private set; }
     // reference ke waktu udah berlalu
     private float timePassed;
 
@@ -61,6 +63,14 @@ public class PlayerStamina : MonoBehaviour
 
             DrainStamina();
         }
+    }
+
+    // Tambah method ini — dipanggil PlayerSprint saat sprint dimulai
+    public void ReduceStamina(float amount)
+    {
+        currentStamina = Mathf.Max(0f, currentStamina - amount);
+        UpdateStaminaBarUI();
+        CheckStaminaTier();
     }
 
     private void UpdateStaminaBarUI()
@@ -102,6 +112,9 @@ public class PlayerStamina : MonoBehaviour
         if (newTier == currentTier) return;
 
         currentTier = newTier; // update tiernya
+
+        CurrentTier = newTier; // ← update static property juga
+
         // invoke eveny nya
         OnStaminaTierChange?.Invoke(currentTier);
     }

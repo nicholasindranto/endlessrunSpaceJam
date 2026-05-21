@@ -58,22 +58,31 @@ public class PlayerWeapon : MonoBehaviour
 
             ObjPool.instance.ReturnToPool(other.gameObject, ObjPool.KindOfObject.Weapon); // balikin obj weaponnya
 
-            // munculin ui weaponnya
+            // Reset alpha ke 0 dulu sebelum fade in, baru aktifkan
+            SetTextAlpha(0f);
             uiWeapon.SetActive(true);
-            if (currentWeaponCount < maxWeaponInventory) StartCoroutine(ShowWeaponUICoroutine());
+
+            // Kondisi dihapus — selalu jalankan coroutine saat pickup
+            StartCoroutine(ShowWeaponUICoroutine());
         }
     }
 
     private IEnumerator ShowWeaponUICoroutine()
     {
-        // 1. FADE IN (Transparan ke Muncul Penuh)
         yield return StartCoroutine(FadeTo(1f, fadeDuration));
-
-        // 2. TUNGGU (Menunggu beberapa saat)
         yield return new WaitForSeconds(showUIDuration);
-
-        // 3. FADE OUT (Muncul Penuh ke Transparan)
         yield return StartCoroutine(FadeTo(0f, fadeDuration));
+
+        // Sembunyikan setelah fade out selesai
+        uiWeapon.SetActive(false);
+    }
+
+    // Helper biar tidak perlu buat Color temporary di luar coroutine
+    private void SetTextAlpha(float alpha)
+    {
+        Color c = weaponText.color;
+        c.a = alpha;
+        weaponText.color = c;
     }
 
     private IEnumerator FadeTo(float targetAlpha, float duration)
@@ -84,19 +93,11 @@ public class PlayerWeapon : MonoBehaviour
         while (elapsedTime < duration)
         {
             elapsedTime += Time.deltaTime;
-            float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / duration); //
-            
-            Color currentColor = weaponText.color;
-            currentColor.a = newAlpha;
-            weaponText.color = currentColor;
-
+            SetTextAlpha(Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / duration));
             yield return null;
         }
 
-        // Pastikan nilai akhir alpha benar-benar tepat
-        Color finalColor = weaponText.color;
-        finalColor.a = targetAlpha;
-        weaponText.color = finalColor;
+        SetTextAlpha(targetAlpha); // pastikan nilai akhir tepat
     }
 
     public void UseWeapon(InputAction.CallbackContext context)
