@@ -10,7 +10,7 @@ public class AutoRemove : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("RemoveObj"))
         {
-            Debug.Log("apakah masuk");
+            // Debug.Log("apakah masuk");
             // pastikan dulu dia balik ke tengah dan dia nggak gerak lagi
             gameObject.transform.localPosition = Vector3.zero;
             if (TryGetComponent(out AutoMoveObj script)) script.isMoving = false;

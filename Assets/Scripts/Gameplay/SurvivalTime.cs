@@ -9,7 +9,7 @@ public class SurvivalTime : MonoBehaviour
     public TextMeshProUGUI timerText;
 
     // reference ke detik sekarang
-    [SerializeField] private float currentSecond;
+    public float currentSecond;
 
     // Start is called before the first frame update
     void Start()

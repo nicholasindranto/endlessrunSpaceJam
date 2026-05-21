@@ -7,9 +7,6 @@ public class TunnelLoop : MonoBehaviour
     // masukin tunnel / world nya ke dalam array
     [SerializeField] private Transform[] tunnels;
 
-    // kecepatan gerak tunnel / world nya
-    [SerializeField] private float tunnelMoveSpeed;
-
     // panjang 1 tunnel / worldnya
     [SerializeField] float tunnelLength;
 
@@ -37,7 +34,8 @@ public class TunnelLoop : MonoBehaviour
 
             // kenapa space.world? biar dia itu ngikutin arah belakangnya dunia bukan 
             // dirinya sendiri
-            tunnels[i].Translate(Vector3.back * tunnelMoveSpeed * Time.deltaTime, Space.World);
+            if (GameManager.instance.player.TryGetComponent(out PlayerSpeed script))
+                tunnels[i].Translate(Vector3.back * script.currentSpeed * Time.deltaTime, Space.World);
         }
 
         // cek apakah udah di belakang player
