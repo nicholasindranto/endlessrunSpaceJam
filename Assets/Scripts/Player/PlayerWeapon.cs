@@ -40,6 +40,10 @@ public class PlayerWeapon : MonoBehaviour
     public int showUIDuration;
     public float fadeDuration;
 
+    // audionya
+    [SerializeField] private AudioClip collectSFX;
+    [SerializeField] private AudioSource source;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -54,6 +58,9 @@ public class PlayerWeapon : MonoBehaviour
         // pick up weaponnya
         if (other.CompareTag(weaponTagName))
         {
+            // play audionya
+            source.PlayOneShot(collectSFX);
+Debug.Log("apakah masuk");
             currentWeaponCount++; // nambah weaponnya di inventory
 
             ObjPool.instance.ReturnToPool(other.gameObject, ObjPool.KindOfObject.Weapon); // balikin obj weaponnya

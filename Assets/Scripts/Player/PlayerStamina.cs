@@ -43,6 +43,10 @@ public class PlayerStamina : MonoBehaviour
     // reference nama tag dari energy
     private readonly string energyTagName = "Energy";
 
+    // audionya
+    [SerializeField] private AudioClip collectSFX;
+    [SerializeField] private AudioSource source;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -55,6 +59,9 @@ public class PlayerStamina : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
         timePassed += Time.deltaTime;
 
         if(timePassed >= 1f)
@@ -133,6 +140,9 @@ public class PlayerStamina : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag(energyTagName))
         {
+            // play audionya
+            source.PlayOneShot(collectSFX);
+
             AddStamina(energyPickUpAmount); // kalau dapat energy, tambah stamina
 
             // balikin ke pool obj nya

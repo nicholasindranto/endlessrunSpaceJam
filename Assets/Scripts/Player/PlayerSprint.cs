@@ -25,11 +25,21 @@ public class PlayerSprint : MonoBehaviour
     public int showUIDuration;
     public float fadeDuration;
 
+    // audionya
+    [SerializeField] private AudioClip sprintSFX;
+    [SerializeField] private AudioSource source;
+
     // ─── Input (hubungkan ke W / Up Arrow di InputActions) ──────────────────────
     public void Sprint(InputAction.CallbackContext context)
     {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
         if (!context.started) return;
         if (IsSprinting) return;
+
+        // play sfx nya
+        source.PlayOneShot(sprintSFX);
 
         // Hanya bisa sprint saat stamina Normal (> 50% / hijau)
         if (PlayerStamina.CurrentTier != PlayerStamina.StaminaTier.Normal)

@@ -16,12 +16,24 @@ public class TunnelRotate : MonoBehaviour
 
     public void RotateLeft(InputAction.CallbackContext context)
     {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
+        // kalau lagi sprint maka skip
+        if (PlayerSprint.IsSprinting) return;
+
         // kalau diteken maka langsung rotate kekiri
         if (context.started) ChangeTargetRotation(rotationDegree);
     }
 
     public void RotateRight(InputAction.CallbackContext context)
     {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
+        // kalau lagi sprint maka skip
+        if (PlayerSprint.IsSprinting) return;
+
         // kalau diteken maka langsung rotate kekanan
         if (context.started) ChangeTargetRotation(-rotationDegree);
     }

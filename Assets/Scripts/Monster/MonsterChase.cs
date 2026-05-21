@@ -64,6 +64,12 @@ public class MonsterChase : MonoBehaviour
     private bool  isSprintRetreating;
     private float sprintRetreatPerSec;
 
+    // reference ke audio roar dan hurt nya
+    [SerializeField] private AudioClip roar, hurt;
+    [SerializeField] private AudioSource source;
+    [SerializeField] private float minEmergenceRoarSFX;
+    [SerializeField] private float maxEmergenceRoarSFX;
+
     private void Awake() {
         currentMonsterMovementPerSecond = baseMonsterMovementPerSecond;
     }
@@ -76,6 +82,26 @@ public class MonsterChase : MonoBehaviour
 
         // di update langsung
         UpdateDistanceUI();
+
+        // bikin suara roar nya
+        StartCoroutine(RoarSFXCoroutine());
+    }
+
+    private IEnumerator RoarSFXCoroutine()
+    {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) yield return null;
+
+        while (!isCaught) // ← berhenti otomatis saat game over
+        {
+            // null check biar tidak crash kalau lupa assign di Inspector
+            if (source != null && roar != null)
+                source.PlayOneShot(roar);
+
+            // float overload → hasil benar-benar acak, bukan hanya bilangan bulat
+            float waitTime = UnityEngine.Random.Range(minEmergenceRoarSFX, maxEmergenceRoarSFX);
+            yield return new WaitForSeconds(waitTime);
+        }
     }
 
     private void OnEnable() {
@@ -150,6 +176,9 @@ public class MonsterChase : MonoBehaviour
 
     private IEnumerator StunCoroutine(float duration)
     {
+        if (source != null && hurt != null)
+        source.PlayOneShot(hurt); // ← hurt play saat monster kena attack
+
         // ke stun
         isStunned = true;
 
@@ -182,6 +211,9 @@ public class MonsterChase : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
         // kalau udah ketangkep maka skip
         if (isCaught) return;
 

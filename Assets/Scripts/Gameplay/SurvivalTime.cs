@@ -20,6 +20,9 @@ public class SurvivalTime : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
         currentSecond += Time.deltaTime; // tambahin detiknya
 
         UpdateUITimer(); // update ui timernya

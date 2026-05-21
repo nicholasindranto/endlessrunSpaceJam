@@ -19,6 +19,9 @@ public class TunnelLoop : MonoBehaviour
     }
 
     private void Update() {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
         HandleEndlessMovement();
     }
 
