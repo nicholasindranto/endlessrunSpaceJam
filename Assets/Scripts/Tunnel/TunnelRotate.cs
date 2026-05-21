@@ -14,6 +14,40 @@ public class TunnelRotate : MonoBehaviour
     // rotatenya berapa derajat
     [SerializeField] private float rotationDegree;
 
+    private void OnEnable() {
+        SwipeController.OnSwipeLeft += HandleSwipeLeft;
+        SwipeController.OnSwipeRight += HandleSwipeRight;
+    }
+
+    private void OnDisable() {
+        SwipeController.OnSwipeLeft -= HandleSwipeLeft;
+        SwipeController.OnSwipeRight -= HandleSwipeRight;
+    }
+
+    private void HandleSwipeLeft()
+    {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
+        // kalau lagi sprint maka skip
+        if (PlayerSprint.IsSprinting) return;
+
+        // kalau diteken maka langsung rotate kekiri
+        ChangeTargetRotation(rotationDegree);
+    }
+
+    private void HandleSwipeRight()
+    {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
+        // kalau lagi sprint maka skip
+        if (PlayerSprint.IsSprinting) return;
+
+        // kalau diteken maka langsung rotate kekanan
+        ChangeTargetRotation(-rotationDegree);
+    }
+
     public void RotateLeft(InputAction.CallbackContext context)
     {
         // kalau belum start gamenya maka skip

@@ -29,6 +29,36 @@ public class PlayerSprint : MonoBehaviour
     [SerializeField] private AudioClip sprintSFX;
     [SerializeField] private AudioSource source;
 
+    private void OnEnable() {
+        SwipeController.OnSwipeUp += HandleSwipeUp;
+    }
+
+    private void OnDisable() {
+        SwipeController.OnSwipeUp -= HandleSwipeUp;
+    }
+
+    private void HandleSwipeUp()
+    {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
+        if (IsSprinting) return;
+
+        // play sfx nya
+        source.PlayOneShot(sprintSFX);
+
+        // Hanya bisa sprint saat stamina Normal (> 50% / hijau)
+        if (PlayerStamina.CurrentTier != PlayerStamina.StaminaTier.Normal)
+        {
+            Debug.Log("Stamina tidak cukup untuk sprint!");
+            SetTextAlpha(0f);
+            StartCoroutine(ShowUICoroutine());
+            return;
+        }
+
+        StartCoroutine(SprintCoroutine());
+    }
+
     // ─── Input (hubungkan ke W / Up Arrow di InputActions) ──────────────────────
     public void Sprint(InputAction.CallbackContext context)
     {

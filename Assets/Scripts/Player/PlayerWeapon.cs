@@ -60,7 +60,7 @@ public class PlayerWeapon : MonoBehaviour
         {
             // play audionya
             source.PlayOneShot(collectSFX);
-Debug.Log("apakah masuk");
+
             currentWeaponCount++; // nambah weaponnya di inventory
 
             ObjPool.instance.ReturnToPool(other.gameObject, ObjPool.KindOfObject.Weapon); // balikin obj weaponnya
@@ -106,6 +106,16 @@ Debug.Log("apakah masuk");
 
         SetTextAlpha(targetAlpha); // pastikan nilai akhir tepat
     }
+
+    private void OnEnable() {
+        SwipeController.OnSwipeDown += HandleSwipeDown;
+    }
+
+    private void OnDisable() {
+        SwipeController.OnSwipeDown -= HandleSwipeDown;
+    }
+
+    private void HandleSwipeDown() => TryAttack();
 
     public void UseWeapon(InputAction.CallbackContext context)
     {
