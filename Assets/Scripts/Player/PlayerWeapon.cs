@@ -44,10 +44,13 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private AudioClip collectSFX;
     [SerializeField] private AudioSource source;
 
+    public bool CanUseInput { get; private set; }
+
     // Start is called before the first frame update
     void Start()
     {
         cam = Camera.main;
+        CanUseInput = true; // di awal bisa menggunakan input
     }
 
     private void OnTriggerEnter(Collider other)
@@ -109,16 +112,23 @@ public class PlayerWeapon : MonoBehaviour
 
     private void OnEnable() {
         SwipeController.OnSwipeDown += HandleSwipeDown;
+        FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
+        FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
     }
 
     private void OnDisable() {
         SwipeController.OnSwipeDown -= HandleSwipeDown;
+        FTUEGameplaySequence.OnDisableAllInput -= () => CanUseInput = false;
+        FTUEGameplaySequence.OnEnableAllInput -= () => CanUseInput = true;
     }
 
     private void HandleSwipeDown() => TryAttack();
 
     public void UseWeapon(InputAction.CallbackContext context)
     {
+        // apakah bisa menggunakan input?
+        if (!CanUseInput) return;
+
         if (context.started) TryAttack(); // kalau ditekan maka coba untuk attack
     }
 

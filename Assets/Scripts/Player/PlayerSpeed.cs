@@ -19,6 +19,14 @@ public class PlayerSpeed : MonoBehaviour
     private int speedBeforeAttack;
     private int speedBeforeSprint;
 
+    // record speed sebelum freeze karena FTUE
+    private int speedBeforeFreeze;
+
+    // reference ke animatornya
+    [SerializeField] private Animator anim;
+    // nama param nya
+    public readonly string runParamName = "IsRunning";
+
     private void Awake() {
         currentSpeed = baseSpeed; // set dulu speed nya
     }
@@ -35,6 +43,10 @@ public class PlayerSpeed : MonoBehaviour
 
         PlayerSprint.OnSprintStart        += HandleSprintStart;   // ← tambahan
         PlayerSprint.OnSprintEnd          += HandleSprintEnd;     // ← tambahan
+
+        // subscribe pas characternya freeze
+        FTUEGameplaySequence.OnAllCharacterFreeze += HandlePlayerFreeze;
+        FTUEGameplaySequence.OnAllCharacterUnfreeze += HandlePlayerUnfreeze;
     }
 
     private void OnDisable() {
@@ -46,6 +58,31 @@ public class PlayerSpeed : MonoBehaviour
 
         PlayerSprint.OnSprintStart        -= HandleSprintStart;   // ← tambahan
         PlayerSprint.OnSprintEnd          -= HandleSprintEnd;     // ← tambahan
+
+        // unsubscribe pas characternya freeze
+        FTUEGameplaySequence.OnAllCharacterFreeze -= HandlePlayerFreeze;
+        FTUEGameplaySequence.OnAllCharacterUnfreeze -= HandlePlayerUnfreeze;
+    }
+
+    private void HandlePlayerFreeze()
+    {
+        // simpen dulu speed sebelum freeze
+        speedBeforeFreeze = currentSpeed;
+
+        // kalau freeze maka speednya 0
+        currentSpeed = 0;
+
+        // matiin animasinya
+        anim.SetBool(runParamName, false);
+    }
+
+    private void HandlePlayerUnfreeze()
+    {
+        // kalau unfreeze maka balik ke speed normal
+        currentSpeed = speedBeforeFreeze;
+
+        // nyalain lagi animasinya
+        anim.SetBool(runParamName, true);
     }
 
     private void HandleSprintStart(int sprintSpeed, float _)

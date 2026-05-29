@@ -53,6 +53,9 @@ public class PlayerStamina : MonoBehaviour
         // setup awal stamina nya full
         currentStamina = maxStamina;
 
+        // set ke normal dulu dong di awal
+        CurrentTier = StaminaTier.Normal;
+
         UpdateStaminaBarUI();
     }
 

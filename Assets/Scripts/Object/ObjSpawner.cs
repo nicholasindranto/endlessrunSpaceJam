@@ -37,6 +37,12 @@ public class ObjSpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // kalau belum start gamenya maka skip
+        if (!MainMenuManager.instance.isAlreadyStarted) return;
+
+        // kalau FTUE nya belum selesai maka skip juga
+        if (!FTUEGameplaySequence.instance.isFTUEFinished) return;
+
         timePassed += Time.deltaTime; // tambahin detiknya / timernya
 
         // kalau udah melebihi atau sama dengan maka spawn dan balikin ke 0

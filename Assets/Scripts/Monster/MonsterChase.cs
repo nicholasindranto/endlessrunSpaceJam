@@ -10,7 +10,7 @@ public class MonsterChase : MonoBehaviour
 {
     [Header("Chase Setting")]
     // monster nya startnya dimana
-    public float monsterStartDistance = 100f;
+    public float monsterStartDistance;
 
     // threshold player ketangkep
     public float caughtThreshold = 7f;
@@ -70,6 +70,9 @@ public class MonsterChase : MonoBehaviour
     [SerializeField] private float minEmergenceRoarSFX;
     [SerializeField] private float maxEmergenceRoarSFX;
 
+    // simpan dulu kecepatannya sebelum freeze
+    private float speedBeforeFreeze;
+
     private void Awake() {
         currentMonsterMovementPerSecond = baseMonsterMovementPerSecond;
     }
@@ -78,7 +81,7 @@ public class MonsterChase : MonoBehaviour
     void Start()
     {
         // posisikan si monster di belakang player dengan dikurangi z nya sebesar distancenya
-        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - monsterStartDistance);
+        transform.position = new Vector3(transform.position.x, transform.position.y, GameManager.instance.player.transform.position.z - monsterStartDistance);
 
         // di update langsung
         UpdateDistanceUI();
@@ -116,6 +119,10 @@ public class MonsterChase : MonoBehaviour
         // ─── Di OnEnable / OnDisable ─────────────────────────────────────────────────
         PlayerSprint.OnSprintStart += HandleSprintStart;
         PlayerSprint.OnSprintEnd   += HandleSprintEnd;
+
+        // subscribe pas characternya freeze
+        FTUEGameplaySequence.OnAllCharacterFreeze += HandleMonsterFreeze;
+        FTUEGameplaySequence.OnAllCharacterUnfreeze += HandleMonsterUnfreeze;
     }
 
     private void OnDisable() {
@@ -130,6 +137,37 @@ public class MonsterChase : MonoBehaviour
         // ─── Di OnDisable ────────────────────────────────────────────────────────────
         PlayerSprint.OnSprintStart -= HandleSprintStart;
         PlayerSprint.OnSprintEnd   -= HandleSprintEnd;
+
+        // unsubscribe pas characternya freeze
+        FTUEGameplaySequence.OnAllCharacterFreeze -= HandleMonsterFreeze;
+        FTUEGameplaySequence.OnAllCharacterUnfreeze -= HandleMonsterUnfreeze;
+    }
+
+    private void HandleMonsterFreeze()
+    {
+        // simpan dulu kecepatan sebelum freeze
+        speedBeforeFreeze = currentMonsterMovementPerSecond;
+
+        // kalau freeze maka speednya 0
+        currentMonsterMovementPerSecond = 0;
+
+        // nggak chasing lagi
+        isChasingPaused = true;
+
+        // matikin animasinya
+        anim.SetBool(chaseParam, false);
+    }
+
+    private void HandleMonsterUnfreeze()
+    {
+        // kalau unfreeze maka balik ke speed normal
+        currentMonsterMovementPerSecond = speedBeforeFreeze;
+
+        // bisa chase lagi
+        isChasingPaused = false;
+
+        // nyalain lagi animasinya
+        anim.SetBool(chaseParam, true);
     }
 
     // ─── Handlers ────────────────────────────────────────────────────────────────

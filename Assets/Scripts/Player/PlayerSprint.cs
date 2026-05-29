@@ -29,12 +29,23 @@ public class PlayerSprint : MonoBehaviour
     [SerializeField] private AudioClip sprintSFX;
     [SerializeField] private AudioSource source;
 
+    public bool CanUseInput { get; private set; }
+
     private void OnEnable() {
         SwipeController.OnSwipeUp += HandleSwipeUp;
+
+        // subscribe ke FTUE nya
+        FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
+        FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
     }
 
     private void OnDisable() {
         SwipeController.OnSwipeUp -= HandleSwipeUp;
+    }
+
+    private void Start() {
+        IsSprinting = false; // di awal nggak mungkin lari dong...
+        CanUseInput = true; //  di awal bisa menggunakan input
     }
 
     private void HandleSwipeUp()
@@ -44,13 +55,16 @@ public class PlayerSprint : MonoBehaviour
 
         if (IsSprinting) return;
 
+        // apakah bisa menggunakan input?
+        if (!CanUseInput) return;
+
         // play sfx nya
         source.PlayOneShot(sprintSFX);
 
         // Hanya bisa sprint saat stamina Normal (> 50% / hijau)
         if (PlayerStamina.CurrentTier != PlayerStamina.StaminaTier.Normal)
         {
-            Debug.Log("Stamina tidak cukup untuk sprint!");
+            Debug.Log($"Stamina tidak cukup untuk sprint!");
             SetTextAlpha(0f);
             StartCoroutine(ShowUICoroutine());
             return;
@@ -68,13 +82,16 @@ public class PlayerSprint : MonoBehaviour
         if (!context.started) return;
         if (IsSprinting) return;
 
+        // apakah bisa menggunakan input?
+        if (!CanUseInput) return;
+
         // play sfx nya
         source.PlayOneShot(sprintSFX);
 
         // Hanya bisa sprint saat stamina Normal (> 50% / hijau)
         if (PlayerStamina.CurrentTier != PlayerStamina.StaminaTier.Normal)
         {
-            Debug.Log("Stamina tidak cukup untuk sprint!");
+            Debug.Log("Stamina tidak cukup untuk sprint! current = {PlayerStamina.CurrentTier}");
             SetTextAlpha(0f);
             StartCoroutine(ShowUICoroutine());
             return;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,10 +19,25 @@ public class MainMenuManager : MonoBehaviour
 
     public bool isAlreadyStarted;
 
+    public static event Action OnFTUEStart;
+
     // Hubungkan ke OnClick di Inspector → drag GameObject button-nya ke parameter
     public void OnButtonClick(GameObject buttonObj)
     {
+        if (buttonObj.TryGetComponent(out Image img))
+        {
+            StartCoroutine(FadeOutImage(img));
+            // matiin raycast target biar yang how to play nya bisa di klik juga
+            img.raycastTarget = false;
+        }
+    }
+
+    public void OnHowToPlayClick(GameObject buttonObj) // ketika diklik maka fadeout juga dan gameplaynya akan jalan
+    {
         isAlreadyStarted = true;
+
+        // start FTUE gameplaynya
+        OnFTUEStart?.Invoke();
 
         if (source != null && gameStartSFX != null)
             source.PlayOneShot(gameStartSFX);

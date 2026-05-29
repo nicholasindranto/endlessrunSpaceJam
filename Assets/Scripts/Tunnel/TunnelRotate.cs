@@ -14,14 +14,33 @@ public class TunnelRotate : MonoBehaviour
     // rotatenya berapa derajat
     [SerializeField] private float rotationDegree;
 
+    public bool CanUseInput
+    {
+        private set;
+        get;
+    }
+
+    private void Start() {
+        // set can use inputnya true
+        CanUseInput = true;
+    }
+
     private void OnEnable() {
         SwipeController.OnSwipeLeft += HandleSwipeLeft;
         SwipeController.OnSwipeRight += HandleSwipeRight;
+
+        // subscribe ke FTUE nya
+        FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
+        FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
     }
 
     private void OnDisable() {
         SwipeController.OnSwipeLeft -= HandleSwipeLeft;
         SwipeController.OnSwipeRight -= HandleSwipeRight;
+
+        // unsubscribe dari FTUE nya
+        FTUEGameplaySequence.OnDisableAllInput -= () => CanUseInput = false;
+        FTUEGameplaySequence.OnEnableAllInput -= () => CanUseInput = true;
     }
 
     private void HandleSwipeLeft()
@@ -31,6 +50,9 @@ public class TunnelRotate : MonoBehaviour
 
         // kalau lagi sprint maka skip
         if (PlayerSprint.IsSprinting) return;
+
+        // apakah bisa menggunakan input?
+        if (!CanUseInput) return;
 
         // kalau diteken maka langsung rotate kekiri
         ChangeTargetRotation(rotationDegree);
@@ -55,6 +77,9 @@ public class TunnelRotate : MonoBehaviour
 
         // kalau lagi sprint maka skip
         if (PlayerSprint.IsSprinting) return;
+
+        // apakah bisa menggunakan input?
+        if (!CanUseInput) return;
 
         // kalau diteken maka langsung rotate kekiri
         if (context.started) ChangeTargetRotation(rotationDegree);
