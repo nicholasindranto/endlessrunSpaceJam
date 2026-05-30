@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FTUESeq4 : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class FTUESeq4 : MonoBehaviour
     public static event Action OnTimerAndStaminaResume;
 
     // reference ke uinya
-    public TextMeshProUGUI sequence4UIText;
+    public Image sequence4UIText;
     public float fadeDuration;
 
     private void OnEnable() {
@@ -84,10 +85,10 @@ public class FTUESeq4 : MonoBehaviour
         StartCoroutine(FadeTextUI(sequence4UIText, fadeDuration, true));
     }
 
-    private IEnumerator FadeTextUI(TextMeshProUGUI text, float duration, bool inOrOut)
+    private IEnumerator FadeTextUI(Image image, float duration, bool inOrOut)
     {
         float elapsed = 0f;
-        Color color = text.color; // Ambil warna dasar teks
+        Color color = image.color; // Ambil warna dasar gambar
 
         float startAlpha = inOrOut ? 0f : 1f;
         float endAlpha = inOrOut ? 1f : 0f;
@@ -97,11 +98,11 @@ public class FTUESeq4 : MonoBehaviour
             elapsed += Time.deltaTime;
             // Gunakan startAlpha dan endAlpha yang sudah pasti, bukan dari text.color saat itu
             float alpha = Mathf.Lerp(startAlpha, endAlpha, elapsed / duration);
-            text.color = new Color(color.r, color.g, color.b, alpha);
+            image.color = new Color(color.r, color.g, color.b, alpha);
             yield return null;
         }
 
         // Pastikan nilai akhir benar-benar presisi
-        text.color = new Color(color.r, color.g, color.b, endAlpha);
+        image.color = new Color(color.r, color.g, color.b, endAlpha);
     }
 }
