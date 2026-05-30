@@ -41,7 +41,7 @@ public class ObjSpawner : MonoBehaviour
         if (!MainMenuManager.instance.isAlreadyStarted) return;
 
         // kalau FTUE nya belum selesai maka skip juga
-        if (!FTUEGameplaySequence.instance.isFTUEFinished) return;
+        if (!FTUEManager.instance.isFTUEFinished) return;
 
         timePassed += Time.deltaTime; // tambahin detiknya / timernya
 

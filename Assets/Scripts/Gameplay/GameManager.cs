@@ -94,12 +94,15 @@ public class GameManager : MonoBehaviour
         // kalau belum game over ya jangan
         if (!isGameOver) return;
 
-        if (context.started)
-        {
-            // kalau ditekan maka game di jalankan lagi dan masuk ke scene ini lagi
-            Time.timeScale = 1;
+        if (context.started) Restart();
+    }
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+    public void Restart()
+    {
+        Debug.Log("masuk ke restart");
+        // kalau ditekan maka game di jalankan lagi dan masuk ke scene ini lagi
+        Time.timeScale = 1;
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

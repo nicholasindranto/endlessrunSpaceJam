@@ -19,6 +19,9 @@ public class PlayerSprint : MonoBehaviour
     // ─── Events ─────────────────────────────────────────────────────────────────
     public static event Action<int, float> OnSprintStart; // (sprintSpeed, retreatPerSec)
     public static event Action             OnSprintEnd;
+    
+    // event untuk FTUE: ketika W/Up Arrow di-tekan untuk sprint
+    // public static event Action OnKeyboardUpInput;
 
     // uinya
     public TextMeshProUGUI sprintUI;
@@ -29,23 +32,89 @@ public class PlayerSprint : MonoBehaviour
     [SerializeField] private AudioClip sprintSFX;
     [SerializeField] private AudioSource source;
 
-    public bool CanUseInput { get; private set; }
+    public bool CanUseInputOnSequence1
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence2
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence3
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence4
+    {
+        private set;
+        get;
+    }
+
+    // lagi di sequence 4 kah?
+    public bool IsInSequence4 { get; private set; }
+
+    // event end of sequence 4
+    public static event Action EndOfSequence4;
 
     private void OnEnable() {
         SwipeController.OnSwipeUp += HandleSwipeUp;
 
         // subscribe ke FTUE nya
-        FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
-        FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
+        // FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
+        // FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
+
+        FTUESeq1.OnIgnoreAllInputExceptRight += () => CanUseInputOnSequence1 = false;
+        FTUESeq1.OnStopIgnoringInput += () => CanUseInputOnSequence1 = true;
+
+        FTUESeq2.OnIgnoreAllInput += () => CanUseInputOnSequence2 = false;
+        FTUESeq2.OnStopIgnoringInput += () => CanUseInputOnSequence2 = true;
+
+        FTUESeq3.OnIgnoreAllInputExceptDown += () => CanUseInputOnSequence3 = false;
+        FTUESeq3.OnStopIgnoringInput += () => CanUseInputOnSequence3 = true;
+
+        FTUESeq4.OnIgnoreAllInputExceptUp += HandleOnSequence4;
+        FTUESeq4.OnStopIgnoringInput += () => CanUseInputOnSequence4 = true;
+
+
     }
 
     private void OnDisable() {
         SwipeController.OnSwipeUp -= HandleSwipeUp;
+
+        FTUESeq1.OnIgnoreAllInputExceptRight -= () => CanUseInputOnSequence1 = false;
+        FTUESeq1.OnStopIgnoringInput -= () => CanUseInputOnSequence1 = true;
+
+        FTUESeq2.OnIgnoreAllInput -= () => CanUseInputOnSequence2 = false;
+        FTUESeq2.OnStopIgnoringInput -= () => CanUseInputOnSequence2 = true;
+
+        FTUESeq3.OnIgnoreAllInputExceptDown -= () => CanUseInputOnSequence3 = false;
+        FTUESeq3.OnStopIgnoringInput -= () => CanUseInputOnSequence3 = true;
+
+        FTUESeq4.OnIgnoreAllInputExceptUp -= HandleOnSequence4;
+        FTUESeq4.OnStopIgnoringInput -= () => CanUseInputOnSequence4 = true;
+    }
+
+    private void HandleOnSequence4()
+    {
+        CanUseInputOnSequence4 = false;
+        IsInSequence4 = true;
     }
 
     private void Start() {
         IsSprinting = false; // di awal nggak mungkin lari dong...
-        CanUseInput = true; //  di awal bisa menggunakan input
+        // set can use inputnya true
+        CanUseInputOnSequence1 = true;
+
+        CanUseInputOnSequence2 = true;
+
+        CanUseInputOnSequence3 = true;
+
+        // set can use inputnya true
+        CanUseInputOnSequence4 = true;
+        IsInSequence4 = false;
     }
 
     private void HandleSwipeUp()
@@ -56,7 +125,16 @@ public class PlayerSprint : MonoBehaviour
         if (IsSprinting) return;
 
         // apakah bisa menggunakan input?
-        if (!CanUseInput) return;
+        if (!CanUseInputOnSequence1 || !CanUseInputOnSequence2 || !CanUseInputOnSequence3) return;
+
+        // kalau lagi di sequence 4 maka invoke event nya
+        if (IsInSequence4)
+        {
+            EndOfSequence4?.Invoke();
+
+            // sudah tidak di sequence 4
+            IsInSequence4 = false;
+        }
 
         // play sfx nya
         source.PlayOneShot(sprintSFX);
@@ -83,7 +161,19 @@ public class PlayerSprint : MonoBehaviour
         if (IsSprinting) return;
 
         // apakah bisa menggunakan input?
-        if (!CanUseInput) return;
+        if (!CanUseInputOnSequence1 || !CanUseInputOnSequence2 || !CanUseInputOnSequence3) return;
+
+        // kalau lagi di sequence 4 maka invoke event nya
+        if (IsInSequence4)
+        {
+            EndOfSequence4?.Invoke();
+
+            // sudah tidak di sequence 4
+            IsInSequence4 = false;
+        }
+
+        // Trigger event untuk FTUE
+        // OnKeyboardUpInput?.Invoke();
 
         // play sfx nya
         source.PlayOneShot(sprintSFX);

@@ -27,6 +27,12 @@ public class PlayerWeapon : MonoBehaviour
     public static event Action<int> OnAttackStart; // ketika start bakalan ngeslow mo tunnel, object, dan monsternya
     public static event Action OnAttackEnd; // ketika udah berakhir maka balik ke kecepatan awal
     public static event Action<float> OnMonsterStun; // ketika ke stun, berapa lama durasinya
+    
+    // event untuk FTUE: ketika weapon di-collect selama sequence 2
+    public static event Action OnWeaponCollected;
+    
+    // event untuk FTUE: ketika S/Down Arrow di-tekan untuk attack
+    // public static event Action OnKeyboardDownInput;
 
     // reference lagi attack apa nggak
     private bool isAttacking;
@@ -44,13 +50,45 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private AudioClip collectSFX;
     [SerializeField] private AudioSource source;
 
-    public bool CanUseInput { get; private set; }
+    public bool CanUseInputOnSequence1
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence2
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence3
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence4
+    {
+        private set;
+        get;
+    }
+
+    // apakah lagi di sequence 3 kah?
+    public bool IsInSequence3 { get; private set; }
+
+    // event end of sequence 3
+    public static event Action EndOfSequence3;
 
     // Start is called before the first frame update
     void Start()
     {
         cam = Camera.main;
-        CanUseInput = true; // di awal bisa menggunakan input
+        // set can use inputnya true
+        CanUseInputOnSequence1 = true;
+
+        CanUseInputOnSequence2 = true;
+
+        CanUseInputOnSequence3 = true;
+        
+        CanUseInputOnSequence4 = true;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -74,6 +112,9 @@ public class PlayerWeapon : MonoBehaviour
 
             // Kondisi dihapus — selalu jalankan coroutine saat pickup
             StartCoroutine(ShowWeaponUICoroutine());
+            
+            // Trigger event untuk FTUE sequence 2 advance
+            OnWeaponCollected?.Invoke();
         }
     }
 
@@ -112,24 +153,84 @@ public class PlayerWeapon : MonoBehaviour
 
     private void OnEnable() {
         SwipeController.OnSwipeDown += HandleSwipeDown;
-        FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
-        FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
+        // FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
+        // FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
+
+        FTUESeq1.OnIgnoreAllInputExceptRight += () => CanUseInputOnSequence1 = false;
+        FTUESeq1.OnStopIgnoringInput += () => CanUseInputOnSequence1 = true;
+
+        FTUESeq2.OnIgnoreAllInput += () => CanUseInputOnSequence2 = false;
+        FTUESeq2.OnStopIgnoringInput += () => CanUseInputOnSequence2 = true;
+
+        FTUESeq3.OnIgnoreAllInputExceptDown += HandleOnSequence3;
+        FTUESeq3.OnStopIgnoringInput += () => CanUseInputOnSequence3 = true;
+
+        FTUESeq4.OnIgnoreAllInputExceptUp += () => CanUseInputOnSequence4 = false;
+        FTUESeq4.OnStopIgnoringInput += () => CanUseInputOnSequence4 = true;
     }
 
     private void OnDisable() {
         SwipeController.OnSwipeDown -= HandleSwipeDown;
-        FTUEGameplaySequence.OnDisableAllInput -= () => CanUseInput = false;
-        FTUEGameplaySequence.OnEnableAllInput -= () => CanUseInput = true;
+        // FTUEGameplaySequence.OnDisableAllInput -= () => CanUseInput = false;
+        // FTUEGameplaySequence.OnEnableAllInput -= () => CanUseInput = true;
+
+        FTUESeq1.OnIgnoreAllInputExceptRight -= () => CanUseInputOnSequence1 = false;
+        FTUESeq1.OnStopIgnoringInput -= () => CanUseInputOnSequence1 = true;
+
+        FTUESeq2.OnIgnoreAllInput -= () => CanUseInputOnSequence2 = false;
+        FTUESeq2.OnStopIgnoringInput -= () => CanUseInputOnSequence2 = true;
+
+        FTUESeq3.OnIgnoreAllInputExceptDown -= HandleOnSequence3;
+        FTUESeq3.OnStopIgnoringInput -= () => CanUseInputOnSequence3 = true;
+
+        FTUESeq4.OnIgnoreAllInputExceptUp -= () => CanUseInputOnSequence4 = false;
+        FTUESeq4.OnStopIgnoringInput -= () => CanUseInputOnSequence4 = true;
     }
 
-    private void HandleSwipeDown() => TryAttack();
+    private void HandleOnSequence3()
+    {
+        CanUseInputOnSequence3 = false;
+        IsInSequence3 = true;
+    }
+
+    private void HandleSwipeDown()
+    {
+        // apakah bisa menggunakan input?
+        if (!CanUseInputOnSequence1 || !CanUseInputOnSequence2 || !CanUseInputOnSequence4) return;
+
+        // kalau lagi di sequence 3 maka invoke event nya
+        if (IsInSequence3)
+        {
+            EndOfSequence3?.Invoke();
+
+            // sudah tidak di sequence 3
+            IsInSequence3 = false;
+        }
+
+        TryAttack();
+    }
 
     public void UseWeapon(InputAction.CallbackContext context)
     {
         // apakah bisa menggunakan input?
-        if (!CanUseInput) return;
+        if (!CanUseInputOnSequence1 || !CanUseInputOnSequence2 || !CanUseInputOnSequence4) return;
 
-        if (context.started) TryAttack(); // kalau ditekan maka coba untuk attack
+        if (context.started)
+        {
+            // kalau lagi di sequence 3 maka invoke event nya
+            if (IsInSequence3)
+            {
+                EndOfSequence3?.Invoke();
+
+                // sudah tidak di sequence 3
+                IsInSequence3 = false;
+            }
+
+            // Trigger event untuk FTUE
+            // OnKeyboardDownInput?.Invoke();
+            
+            TryAttack(); // kalau ditekan maka coba untuk attack
+        }
     }
 
     private void TryAttack()

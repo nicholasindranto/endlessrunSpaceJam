@@ -45,8 +45,20 @@ public class PlayerSpeed : MonoBehaviour
         PlayerSprint.OnSprintEnd          += HandleSprintEnd;     // ← tambahan
 
         // subscribe pas characternya freeze
-        FTUEGameplaySequence.OnAllCharacterFreeze += HandlePlayerFreeze;
-        FTUEGameplaySequence.OnAllCharacterUnfreeze += HandlePlayerUnfreeze;
+        // FTUEGameplaySequence.OnAllCharacterFreeze += HandlePlayerFreeze;
+        // FTUEGameplaySequence.OnAllCharacterUnfreeze += HandlePlayerUnfreeze;
+
+        FTUESeq1.OnAllCharacterFreeze += HandlePlayerFreeze;
+        FTUESeq1.OnAllCharacterUnfreeze += HandlePlayerUnfreeze;
+
+        FTUESeq2.OnAllCharacterFreeze += HandlePlayerFreeze;
+        FTUESeq2.OnAllCharacterUnfreeze += HandlePlayerUnfreeze;
+
+        FTUESeq3.OnAllCharacterFreeze += HandlePlayerFreeze;
+        FTUESeq3.OnAllCharacterUnfreeze += HandlePlayerUnfreeze;
+
+        FTUESeq4.OnAllCharacterFreeze += HandlePlayerFreeze;
+        FTUESeq4.OnAllCharacterUnfreeze += HandlePlayerUnfreeze;
     }
 
     private void OnDisable() {
@@ -60,8 +72,20 @@ public class PlayerSpeed : MonoBehaviour
         PlayerSprint.OnSprintEnd          -= HandleSprintEnd;     // ← tambahan
 
         // unsubscribe pas characternya freeze
-        FTUEGameplaySequence.OnAllCharacterFreeze -= HandlePlayerFreeze;
-        FTUEGameplaySequence.OnAllCharacterUnfreeze -= HandlePlayerUnfreeze;
+        // FTUEGameplaySequence.OnAllCharacterFreeze -= HandlePlayerFreeze;
+        // FTUEGameplaySequence.OnAllCharacterUnfreeze -= HandlePlayerUnfreeze;
+
+        FTUESeq1.OnAllCharacterFreeze -= HandlePlayerFreeze;
+        FTUESeq1.OnAllCharacterUnfreeze -= HandlePlayerUnfreeze;
+
+        FTUESeq2.OnAllCharacterFreeze -= HandlePlayerFreeze;
+        FTUESeq2.OnAllCharacterUnfreeze -= HandlePlayerUnfreeze;
+
+        FTUESeq3.OnAllCharacterFreeze -= HandlePlayerFreeze;
+        FTUESeq3.OnAllCharacterUnfreeze -= HandlePlayerUnfreeze;
+
+        FTUESeq4.OnAllCharacterFreeze -= HandlePlayerFreeze;
+        FTUESeq4.OnAllCharacterUnfreeze -= HandlePlayerUnfreeze;
     }
 
     private void HandlePlayerFreeze()
@@ -73,7 +97,7 @@ public class PlayerSpeed : MonoBehaviour
         currentSpeed = 0;
 
         // matiin animasinya
-        anim.SetBool(runParamName, false);
+        anim.speed = 0f;
     }
 
     private void HandlePlayerUnfreeze()
@@ -82,7 +106,7 @@ public class PlayerSpeed : MonoBehaviour
         currentSpeed = speedBeforeFreeze;
 
         // nyalain lagi animasinya
-        anim.SetBool(runParamName, true);
+        anim.speed = 1f;
     }
 
     private void HandleSprintStart(int sprintSpeed, float _)

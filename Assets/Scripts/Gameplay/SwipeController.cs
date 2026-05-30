@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using Lean.Touch;
 
 public class SwipeController : MonoBehaviour
 {
@@ -14,40 +14,34 @@ public class SwipeController : MonoBehaviour
     public static event Action OnSwipeDown;
 
     // ─── Private ────────────────────────────────────────────────────────────────
-    private Vector2 startPosition;
-    private bool    isPressing;
+    // Input mode tracking untuk FTUE
+    // private FTUEGameplaySequence.InputMode currentInputMode = FTUEGameplaySequence.InputMode.AllEnabled;
 
-    // ─── Input Callbacks ─────────────────────────────────────────────────────────
-    // Hubungkan ke action "Press" (Button) di InputActions
-    public void OnPress(InputAction.CallbackContext context)
+    private void OnEnable()
     {
-        if (context.started)
-        {
-            // Jari / kursor mulai menyentuh
-            startPosition = GetCurrentPosition();
-            isPressing    = true;
-        }
-        else if (context.canceled && isPressing)
-        {
-            // Jari / kursor diangkat → hitung arah swipe
-            Vector2 endPosition = GetCurrentPosition();
-            DetectSwipe(endPosition);
-            isPressing = false;
-        }
+        // FTUEGameplaySequence.OnInputModeChange += HandleInputModeChange;
+        LeanTouch.OnFingerSwipe += HandleFingerSwipe;
     }
 
-    // Hubungkan ke action "Position" (Value / Vector2) di InputActions
-    // Diperlukan supaya GetCurrentPosition() bisa baca posisi sekarang
-    private Vector2 currentPosition;
-    public void OnPosition(InputAction.CallbackContext context)
+    private void OnDisable()
     {
-        currentPosition = context.ReadValue<Vector2>();
+        // FTUEGameplaySequence.OnInputModeChange -= HandleInputModeChange;
+        LeanTouch.OnFingerSwipe -= HandleFingerSwipe;
     }
 
-    // ─── Swipe Logic ─────────────────────────────────────────────────────────────
-    private void DetectSwipe(Vector2 endPosition)
+    // private void HandleInputModeChange(FTUEGameplaySequence.InputMode mode)
+    // {
+    //     currentInputMode = mode;
+    // }
+
+    // ─── LeanTouch Swipe Handler ────────────────────────────────────────────────
+    private void HandleFingerSwipe(LeanFinger finger)
     {
-        Vector2 delta = endPosition - startPosition;
+        // Hanya process jika finger actually swiped
+        if (!finger.Swipe) return;
+
+        // Hitung delta dari StartScreenPosition ke ScreenPosition
+        Vector2 delta = finger.ScreenPosition - finger.StartScreenPosition;
 
         // Cek apakah jarak swipe cukup jauh
         if (delta.magnitude < minSwipeDistance) return;
@@ -67,5 +61,26 @@ public class SwipeController : MonoBehaviour
         }
     }
 
-    private Vector2 GetCurrentPosition() => currentPosition;
+    // ─── Swipe Logic ─────────────────────────────────────────────────────────────
+    // private void InvokeIfAllowed(Action swipeEvent)
+    // {
+    //     // Kalau AllEnabled, selalu invoke
+    //     if (currentInputMode == FTUEGameplaySequence.InputMode.AllEnabled)
+    //     {
+    //         swipeEvent?.Invoke();
+    //         return;
+    //     }
+
+    //     // Kalau AllDisabled, jangan invoke apapun
+    //     if (currentInputMode == FTUEGameplaySequence.InputMode.AllDisabled)
+    //         return;
+
+    //     // Kalau restricted mode, check sebelum invoke
+    //     if (swipeEvent == OnSwipeRight && currentInputMode == FTUEGameplaySequence.InputMode.OnlyRight)
+    //         swipeEvent?.Invoke();
+    //     else if (swipeEvent == OnSwipeDown && currentInputMode == FTUEGameplaySequence.InputMode.OnlyDown)
+    //         swipeEvent?.Invoke();
+    //     else if (swipeEvent == OnSwipeUp && currentInputMode == FTUEGameplaySequence.InputMode.OnlyUp)
+    //         swipeEvent?.Invoke();
+    // }
 }

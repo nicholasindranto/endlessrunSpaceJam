@@ -43,7 +43,11 @@ public class MainMenuManager : MonoBehaviour
             source.PlayOneShot(gameStartSFX);
 
         if (buttonObj.TryGetComponent(out Image img))
+        {
             StartCoroutine(FadeOutImage(img));
+            // matiin raycast target biar yang how to play nya bisa di klik juga
+            img.raycastTarget = false;
+        }
     }
 
     private IEnumerator FadeOutImage(Image img)

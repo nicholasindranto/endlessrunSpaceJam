@@ -123,6 +123,15 @@ public class MonsterChase : MonoBehaviour
         // subscribe pas characternya freeze
         FTUEGameplaySequence.OnAllCharacterFreeze += HandleMonsterFreeze;
         FTUEGameplaySequence.OnAllCharacterUnfreeze += HandleMonsterUnfreeze;
+
+        FTUESeq2.OnAllCharacterFreeze += HandleMonsterFreeze;
+        FTUESeq2.OnAllCharacterUnfreeze += HandleMonsterUnfreeze;
+
+        FTUESeq3.OnAllCharacterFreeze += HandleMonsterFreeze;
+        FTUESeq3.OnAllCharacterUnfreeze += HandleMonsterUnfreeze;
+
+        FTUESeq4.OnAllCharacterFreeze += HandleMonsterFreeze;
+        FTUESeq4.OnAllCharacterUnfreeze += HandleMonsterUnfreeze;
     }
 
     private void OnDisable() {
@@ -141,6 +150,15 @@ public class MonsterChase : MonoBehaviour
         // unsubscribe pas characternya freeze
         FTUEGameplaySequence.OnAllCharacterFreeze -= HandleMonsterFreeze;
         FTUEGameplaySequence.OnAllCharacterUnfreeze -= HandleMonsterUnfreeze;
+
+        FTUESeq2.OnAllCharacterFreeze -= HandleMonsterFreeze;
+        FTUESeq2.OnAllCharacterUnfreeze -= HandleMonsterUnfreeze;
+
+        FTUESeq3.OnAllCharacterFreeze -= HandleMonsterFreeze;
+        FTUESeq3.OnAllCharacterUnfreeze -= HandleMonsterUnfreeze;
+
+        FTUESeq4.OnAllCharacterFreeze -= HandleMonsterFreeze;
+        FTUESeq4.OnAllCharacterUnfreeze -= HandleMonsterUnfreeze;
     }
 
     private void HandleMonsterFreeze()
@@ -155,7 +173,7 @@ public class MonsterChase : MonoBehaviour
         isChasingPaused = true;
 
         // matikin animasinya
-        anim.SetBool(chaseParam, false);
+        anim.speed = 0f;
     }
 
     private void HandleMonsterUnfreeze()
@@ -167,7 +185,7 @@ public class MonsterChase : MonoBehaviour
         isChasingPaused = false;
 
         // nyalain lagi animasinya
-        anim.SetBool(chaseParam, true);
+        anim.speed = 1f;
     }
 
     // ─── Handlers ────────────────────────────────────────────────────────────────
@@ -221,7 +239,7 @@ public class MonsterChase : MonoBehaviour
         isStunned = true;
 
         // matikin animasinya
-        anim.SetBool(chaseParam, false);
+        anim.speed = 0f;
 
         // tunggu durasinya
         yield return new WaitForSeconds(duration);
@@ -231,7 +249,7 @@ public class MonsterChase : MonoBehaviour
         isChasingPaused = false;
         currentMonsterMovementPerSecond = speedBeforeStunned;
 
-        anim.SetBool(chaseParam, true);
+        anim.speed = 1f;
     }
 
     private void HandleStaminaTierChange(PlayerStamina.StaminaTier staminaTier)

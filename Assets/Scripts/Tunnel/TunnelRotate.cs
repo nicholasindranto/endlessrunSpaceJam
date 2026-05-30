@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,15 +13,52 @@ public class TunnelRotate : MonoBehaviour
     // rotatenya berapa derajat
     [SerializeField] private float rotationDegree;
 
-    public bool CanUseInput
+    public bool CanUseInputOnSequence1
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence2
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence3
+    {
+        private set;
+        get;
+    }
+    public bool CanUseInputOnSequence4
     {
         private set;
         get;
     }
 
+    // lagi di sequence 1 kah?
+    public bool IsInSequence1 { get; private set; }
+
+    // event end of sequence 1
+    public static event Action EndOfSequence1;
+
+    // Track input mode untuk disable rotation saat sequence 2
+    // private FTUEGameplaySequence.InputMode currentInputMode = FTUEGameplaySequence.InputMode.AllEnabled;
+    
+    // Event untuk FTUE: ketika D/Right Arrow di-tekan
+    // public static event Action OnKeyboardRightInput;
+
     private void Start() {
         // set can use inputnya true
-        CanUseInput = true;
+        CanUseInputOnSequence1 = true;
+        IsInSequence1 = false;
+
+        // set can use inputnya true
+        CanUseInputOnSequence2 = true;
+
+        // set can use inputnya true
+        CanUseInputOnSequence3 = true;
+
+        // set can use inputnya true
+        CanUseInputOnSequence4 = true;
     }
 
     private void OnEnable() {
@@ -30,8 +66,23 @@ public class TunnelRotate : MonoBehaviour
         SwipeController.OnSwipeRight += HandleSwipeRight;
 
         // subscribe ke FTUE nya
-        FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
-        FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
+        // FTUEGameplaySequence.OnDisableAllInput += () => CanUseInput = false;
+        // FTUEGameplaySequence.OnEnableAllInput += () => CanUseInput = true;
+        
+        // subscribe ke input mode change untuk tracking
+        // FTUEGameplaySequence.OnInputModeChange += HandleInputModeChange;
+
+        FTUESeq1.OnIgnoreAllInputExceptRight += HandleOnSequence1;
+        FTUESeq1.OnStopIgnoringInput += () => CanUseInputOnSequence1 = true;
+
+        FTUESeq2.OnIgnoreAllInput += () => CanUseInputOnSequence2 = false;
+        FTUESeq2.OnStopIgnoringInput += () => CanUseInputOnSequence2 = true;
+
+        FTUESeq3.OnIgnoreAllInputExceptDown += () => CanUseInputOnSequence3 = false;
+        FTUESeq3.OnStopIgnoringInput += () => CanUseInputOnSequence3 = true;
+
+        FTUESeq4.OnIgnoreAllInputExceptUp += () => CanUseInputOnSequence4 = false;
+        FTUESeq4.OnStopIgnoringInput += () => CanUseInputOnSequence4 = true;
     }
 
     private void OnDisable() {
@@ -39,9 +90,35 @@ public class TunnelRotate : MonoBehaviour
         SwipeController.OnSwipeRight -= HandleSwipeRight;
 
         // unsubscribe dari FTUE nya
-        FTUEGameplaySequence.OnDisableAllInput -= () => CanUseInput = false;
-        FTUEGameplaySequence.OnEnableAllInput -= () => CanUseInput = true;
+        // FTUEGameplaySequence.OnDisableAllInput -= () => CanUseInput = false;
+        // FTUEGameplaySequence.OnEnableAllInput -= () => CanUseInput = true;
+        
+        // unsubscribe dari input mode change
+        // FTUEGameplaySequence.OnInputModeChange -= HandleInputModeChange;
+
+        FTUESeq1.OnIgnoreAllInputExceptRight -= HandleOnSequence1;
+        FTUESeq1.OnStopIgnoringInput -= () => CanUseInputOnSequence1 = true;
+
+        FTUESeq2.OnIgnoreAllInput -= () => CanUseInputOnSequence2 = false;
+        FTUESeq2.OnStopIgnoringInput -= () => CanUseInputOnSequence2 = true;
+
+        FTUESeq3.OnIgnoreAllInputExceptDown -= () => CanUseInputOnSequence3 = false;
+        FTUESeq3.OnStopIgnoringInput -= () => CanUseInputOnSequence3 = true;
+
+        FTUESeq4.OnIgnoreAllInputExceptUp -= () => CanUseInputOnSequence4 = false;
+        FTUESeq4.OnStopIgnoringInput -= () => CanUseInputOnSequence4 = true;
     }
+
+    private void HandleOnSequence1()
+    {
+        CanUseInputOnSequence1 = false;
+        IsInSequence1 = true;
+    }
+
+    // private void HandleInputModeChange(FTUEGameplaySequence.InputMode mode)
+    // {
+    //     currentInputMode = mode;
+    // }
 
     private void HandleSwipeLeft()
     {
@@ -52,7 +129,7 @@ public class TunnelRotate : MonoBehaviour
         if (PlayerSprint.IsSprinting) return;
 
         // apakah bisa menggunakan input?
-        if (!CanUseInput) return;
+        if (!CanUseInputOnSequence1 || !CanUseInputOnSequence2 || !CanUseInputOnSequence3 || !CanUseInputOnSequence4) return;
 
         // kalau diteken maka langsung rotate kekiri
         ChangeTargetRotation(rotationDegree);
@@ -65,6 +142,18 @@ public class TunnelRotate : MonoBehaviour
 
         // kalau lagi sprint maka skip
         if (PlayerSprint.IsSprinting) return;
+
+        // apakah bisa menggunakan input?
+        if (!CanUseInputOnSequence2 || !CanUseInputOnSequence3 || !CanUseInputOnSequence4) return;
+
+        // kalau lagi di sequence 1 maka invoke event nya
+        if (IsInSequence1)
+        {
+            EndOfSequence1?.Invoke();
+
+            // sudah tidak di sequence 1
+            IsInSequence1 = false;
+        }
 
         // kalau diteken maka langsung rotate kekanan
         ChangeTargetRotation(-rotationDegree);
@@ -79,7 +168,7 @@ public class TunnelRotate : MonoBehaviour
         if (PlayerSprint.IsSprinting) return;
 
         // apakah bisa menggunakan input?
-        if (!CanUseInput) return;
+        if (!CanUseInputOnSequence1 || !CanUseInputOnSequence2 || !CanUseInputOnSequence3 || !CanUseInputOnSequence4) return;
 
         // kalau diteken maka langsung rotate kekiri
         if (context.started) ChangeTargetRotation(rotationDegree);
@@ -93,8 +182,26 @@ public class TunnelRotate : MonoBehaviour
         // kalau lagi sprint maka skip
         if (PlayerSprint.IsSprinting) return;
 
-        // kalau diteken maka langsung rotate kekanan
-        if (context.started) ChangeTargetRotation(-rotationDegree);
+        // apakah bisa menggunakan input?
+        if (!CanUseInputOnSequence2 || !CanUseInputOnSequence3 || !CanUseInputOnSequence4) return;
+
+        if (context.started)
+        {
+            // Trigger event untuk FTUE
+            // OnKeyboardRightInput?.Invoke();
+
+            // kalau lagi di sequence 1 maka invoke event nya
+            if (IsInSequence1)
+            {
+                EndOfSequence1?.Invoke();
+
+                // sudah tidak di sequence 1
+                IsInSequence1 = false;
+            }
+            
+            // kalau diteken maka langsung rotate kekanan
+            ChangeTargetRotation(-rotationDegree);
+        }
     }
 
     // Update is called once per frame

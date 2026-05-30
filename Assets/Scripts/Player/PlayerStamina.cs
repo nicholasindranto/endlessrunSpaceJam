@@ -47,6 +47,32 @@ public class PlayerStamina : MonoBehaviour
     [SerializeField] private AudioClip collectSFX;
     [SerializeField] private AudioSource source;
 
+    public bool IsReducing { private set; get; }
+
+    private void OnEnable() {
+        FTUESeq1.OnTimerStopAndStaminaStop += () => IsReducing = false;
+        FTUESeq2.OnTimerStopAndStaminaStop += () => IsReducing = false;
+        FTUESeq3.OnTimerStopAndStaminaStop += () => IsReducing = false;
+        FTUESeq4.OnTimerStopAndStaminaStop += () => IsReducing = false;
+        
+        FTUESeq1.OnTimerAndStaminaResume += () => IsReducing = true;
+        FTUESeq2.OnTimerAndStaminaResume += () => IsReducing = true;
+        FTUESeq3.OnTimerAndStaminaResume += () => IsReducing = true;
+        FTUESeq4.OnTimerAndStaminaResume += () => IsReducing = true;
+    }
+
+    private void OnDisable() {
+        FTUESeq1.OnTimerStopAndStaminaStop -= () => IsReducing = false;
+        FTUESeq2.OnTimerStopAndStaminaStop -= () => IsReducing = false;
+        FTUESeq3.OnTimerStopAndStaminaStop -= () => IsReducing = false;
+        FTUESeq4.OnTimerStopAndStaminaStop -= () => IsReducing = false;
+        
+        FTUESeq1.OnTimerAndStaminaResume -= () => IsReducing = true;
+        FTUESeq2.OnTimerAndStaminaResume -= () => IsReducing = true;
+        FTUESeq3.OnTimerAndStaminaResume -= () => IsReducing = true;
+        FTUESeq4.OnTimerAndStaminaResume -= () => IsReducing = true;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -55,6 +81,8 @@ public class PlayerStamina : MonoBehaviour
 
         // set ke normal dulu dong di awal
         CurrentTier = StaminaTier.Normal;
+
+        IsReducing = true;
 
         UpdateStaminaBarUI();
     }
@@ -71,7 +99,10 @@ public class PlayerStamina : MonoBehaviour
         {
             timePassed -= 1f;
 
-            DrainStamina();
+            if (IsReducing)
+            {
+                DrainStamina();
+            }
         }
     }
 

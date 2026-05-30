@@ -11,10 +11,38 @@ public class SurvivalTime : MonoBehaviour
     // reference ke detik sekarang
     public float currentSecond;
 
+    // untuk cek apakah stamina dan timer harus berhenti atau tidak
+    public bool IsTimerWorking { get; private set; }
+
+    private void OnEnable() {
+        FTUESeq1.OnTimerStopAndStaminaStop += () => IsTimerWorking = false;
+        FTUESeq2.OnTimerStopAndStaminaStop += () => IsTimerWorking = false;
+        FTUESeq3.OnTimerStopAndStaminaStop += () => IsTimerWorking = false;
+        FTUESeq4.OnTimerStopAndStaminaStop += () => IsTimerWorking = false;
+
+        FTUESeq1.OnTimerAndStaminaResume += () => IsTimerWorking = true;
+        FTUESeq2.OnTimerAndStaminaResume += () => IsTimerWorking = true;
+        FTUESeq3.OnTimerAndStaminaResume += () => IsTimerWorking = true;
+        FTUESeq4.OnTimerAndStaminaResume += () => IsTimerWorking = true;
+    }
+
+    private void OnDisable() {
+        FTUESeq1.OnTimerStopAndStaminaStop -= () => IsTimerWorking = false;
+        FTUESeq2.OnTimerStopAndStaminaStop -= () => IsTimerWorking = false;
+        FTUESeq3.OnTimerStopAndStaminaStop -= () => IsTimerWorking = false;
+        FTUESeq4.OnTimerStopAndStaminaStop -= () => IsTimerWorking = false;
+
+        FTUESeq1.OnTimerAndStaminaResume -= () => IsTimerWorking = true;
+        FTUESeq2.OnTimerAndStaminaResume -= () => IsTimerWorking = true;
+        FTUESeq3.OnTimerAndStaminaResume -= () => IsTimerWorking = true;
+        FTUESeq4.OnTimerAndStaminaResume -= () => IsTimerWorking = true;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         currentSecond = 0f;
+        IsTimerWorking = true;
     }
 
     // Update is called once per frame
@@ -23,7 +51,10 @@ public class SurvivalTime : MonoBehaviour
         // kalau belum start gamenya maka skip
         if (!MainMenuManager.instance.isAlreadyStarted) return;
 
-        currentSecond += Time.deltaTime; // tambahin detiknya
+        if (IsTimerWorking)
+        {
+            currentSecond += Time.deltaTime; // tambahin detiknya
+        }
 
         UpdateUITimer(); // update ui timernya
     }
